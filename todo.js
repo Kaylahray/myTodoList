@@ -1,28 +1,3 @@
-// let listArray = [];
-
-// let inp = document.getElementById("inp");
-// let ulTodo = document.getElementById("todo-list");
-// let btn = document.getElementById("add");
-
-// //
-
-// btn.addEventListener("click", function () {
-//   for (let i = 0; i < listArray.length; i++) {
-//     listArray[i].unshift(inp.value);
-//   }
-//   //   listArray.unshift(inp.value);
-//   showList();
-// });
-
-// function showList() {
-//   let list = document.createElement("li");
-//   list.classList.add("list-item");
-//   ulTodo.appendChild(list);
-//   //   list.innerText = " ";
-//   localStorage.setItem("li", inp.value);
-//   list.innerText = localStorage.getItem("li");
-// }
-
 const todoForm = document.getElementById("todo-form");
 const todoInput = document.getElementById("todo-input");
 const todoList = document.getElementById("todo-list");
@@ -37,8 +12,8 @@ function renderTodos() {
     <div class='list'>
     <span>${todo}</span>
     <div className="btn">
-    <button class="edit-btn" data-index="${index}">Edit</button>
-    <button class="delete-btn" data-index="${index}">Delete</button>
+    <button class="edit-btn" data-index="${index}"><i class="ri-pencil-fill"></i></button>
+    <button class="delete-btn" data-index="${index}"><i class="ri-delete-bin-6-line"></i></button>
     </div>
     </div>
           `;
