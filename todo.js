@@ -64,7 +64,6 @@ function deleteTodo() {
   // this.dataset.index was actually correct and on point!
   // if you console.log(this) "this", it will make a lot sense to you what i changed.
   const index = this.index
-  console.log(index)
   baseTodos.splice(index, 1);
   localStorage.setItem("todos", JSON.stringify(baseTodos));
   baseTodos = JSON.parse(localStorage.getItem("todos"));
