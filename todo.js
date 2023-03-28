@@ -1,52 +1,72 @@
 const todoForm = document.getElementById("todo-form");
 const todoInput = document.getElementById("todo-input");
 const todoList = document.getElementById("todo-list");
-let todos = JSON.parse(localStorage.getItem("todos")) || [];
+let baseTodos = JSON.parse(localStorage.getItem("todos")) || [];
 
 //Rendering todo
 function renderTodos() {
-  todoList.innerHTML = "";
-  todos.forEach((todo, index) => {
+  todoList.innerHTML = '';
+  baseTodos.forEach((todo, index) => {
     const li = document.createElement("li");
-    li.innerHTML = `
-    <div class='list'>
-    <span>${todo}</span>
-    <div className="btn">
-    <button class="edit-btn" data-index="${index}"><i class="ri-pencil-fill"></i></button>
-    <button class="delete-btn" data-index="${index}"><i class="ri-delete-bin-6-line"></i></button>
-    </div>
-    </div>
-          `;
+    li.innerHTML = 
+    `
+      <div class='list todo-item' key=${index}>
+        <span>${todo}</span>
+        <div class="action-buttons">
+          <span class="btn-span" data-index=${index}>
+            <i class="ri-pencil-fill icons edit-btn" data-index=${index}></i>
+          </span>
+          
+          <span data-index=${index}>
+            <i class="ri-delete-bin-6-line icons delete-btn" data-index=${index}></i>
+          </span>
+        </div>
+      </div>
+    `;
     todoList.appendChild(li);
   });
-}
+};
+// placing this function here means it called exactly once on initial render/load and any 
+// subsequent call. you were calling it twice after every edit or delete action which
+// isn't ideal 
+renderTodos();
 
 //Adding todo
 function addTodo() {
   const todo = todoInput.value.trim();
   if (!todo) return;
-  todos.push(todo);
-  localStorage.setItem("todos", JSON.stringify(todos));
-  renderTodos();
+  let newTodos = baseTodos.concat(todo)
   todoInput.value = "";
+  localStorage.setItem("todos", JSON.stringify(newTodos));
+  baseTodos = JSON.parse(localStorage.getItem("todos"));
+  renderTodos()
 }
 
 //Editing todo
 function editTodo() {
-  const index = parseInt(this.dataset.index);
-  const todo = prompt("Enter the updated todo:", todos[index]);
+  const index = this.index
+  const todo = prompt("Enter the updated todo:", baseTodos[index]);
   if (todo !== null) {
-    todos[index] = todo.trim();
-    localStorage.setItem("todos", JSON.stringify(todos));
+    baseTodos[index] = todo.trim();
+    localStorage.setItem("todos", JSON.stringify(baseTodos));
+    baseTodos = JSON.parse(localStorage.getItem("todos"));
     renderTodos();
   }
 }
 
 //Deleting todo
 function deleteTodo() {
-  const index = parseInt(this.dataset.index);
-  todos.splice(index, 1);
-  localStorage.setItem("todos", JSON.stringify(todos));
+  // your former approach was passing in the entire e.target(don't do this) into this function 
+  // and specifically extracting index value from the e.target object you passed from "todoList.addEventListener"
+  // dataset: {
+  //   index: 7 or 8 or 1
+  // }
+  // this.dataset.index was actually correct and on point!
+  // if you console.log(this) "this", it will make a lot sense to you what i changed.
+  const index = this.index
+  baseTodos.splice(index, 1);
+  localStorage.setItem("todos", JSON.stringify(baseTodos));
+  baseTodos = JSON.parse(localStorage.getItem("todos"));
   renderTodos();
 }
 
@@ -57,12 +77,21 @@ todoForm.addEventListener("submit", (e) => {
 });
 
 //Allowing user call edit or delete
-todoList.addEventListener("click", (e) => {
-  if (e.target.classList.contains("edit-btn")) {
-    editTodo.call(e.target);
-  } else if (e.target.classList.contains("delete-btn")) {
-    deleteTodo.call(e.target);
+todoList.addEventListener("click", ({target}) => {
+  // using target.parentNode because depending on what area of the delete or edit box
+  // you click you still get the index because it is an attribute of the button as well as 
+  // the buttons parent(span). THIS IS THE ORIGIN OF YOUR ERROR
+  // another issue i noticed was that the icons were not filling their containers
+  // thereby inheriting their action
+  const selectedItem = target.parentNode;
+  const getElementIndex = selectedItem.getAttribute("data-index");
+  const itemIndex = parseInt(getElementIndex)
+  // the functions below that recieves index as an arguement is expecting it stored as an object hence
+  let itemIndexObject = {index: itemIndex}
+
+  if (target.classList.contains("edit-btn")) {
+    editTodo.call(itemIndexObject);
+  } else if (target.classList.contains("delete-btn")) {
+    deleteTodo.call(itemIndexObject);
   }
 });
-
-renderTodos();
